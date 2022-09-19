@@ -92,8 +92,8 @@ def print_G(matrice):
 
 
 if __name__ == '__main__':
-    lab = Labyrinthe(5)
-    lab.remplir(5)
+    lab = Labyrinthe(10)
+    lab.remplir(10)
     offset = 100
     G = lab.obtenir_matrice()
     depart = trouver_depart(G)

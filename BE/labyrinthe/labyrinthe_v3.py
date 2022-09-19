@@ -1,5 +1,7 @@
 """
 Résoudre le problème du labyrinthe
+
+Algorithme à Essais Successifs (AES), implementation utilisant matrice de numéros et BFS
 """
 from collections import deque
 from time import time
@@ -21,10 +23,44 @@ def initialiser_matrice_des_numeros(mat):
         mat_res.append([])
         for el in row:
             if el == 0:
-                mat_res[i].append(10000000000)
+                mat_res[i].append(10000)
             else:
                 mat_res[i].append(el)
     return mat_res
+
+
+def initialiser_matrice_de_probabilites(mat):
+    mat_res = []
+    for i, row in enumerate(mat):
+        mat_res.append([])
+        for el in row:
+            if el == 0:
+                mat_res[i].append(0.25)
+            elif el == 3:
+                mat_res[i].append(1)
+            else:
+                mat_res[i].append(0)
+    return mat_res
+
+
+def parcours_probabiliste(mat_de_prob, labyrinthe, noeud_courant, ):
+    x_courant, y_courant = noeud_courant
+    if labyrinthe[x_courant][y_courant] == 3:
+        mat_de_prob[x_courant][y_courant] = 1
+        return True
+    possibilites = []
+    for step in TAB_DELTA_X_Y:
+        n_x = x_courant + step[0]
+        n_y = y_courant + step[1]
+        if prometteur(labyrinthe, (n_x, n_y)) and mat_de_prob[n_x][n_y] >= 0:
+            possibilites.append((n_x, n_y))
+    for _ in range(len(possibilites)):
+        possibilites.sort(key=lambda x: mat_de_prob[x[0]][x[1]])
+        next_x, next_y = possibilites.pop()
+        mat_de_prob[next_x][next_y] *= 0.9
+        if parcours_probabiliste(mat_de_prob, labyrinthe, (next_x, next_y)):
+            return True
+        mat_de_prob[next_x][next_y] *= 0.5
 
 
 def numerotation_des_cases(mat_des_numeros, labyrinthe, noeud_courant, numero_de_cette_case):
@@ -57,7 +93,7 @@ def un_des_PCC(labyrinthe, mdn, premier_noeud):
             while path_node != premier_noeud:
                 path_node = parents[path_node]
                 path.append(path_node)
-            return path
+            return path[::-1]
         for step in TAB_DELTA_X_Y:
             next_x = x_courant + step[0]
             next_y = y_courant + step[1]
@@ -84,7 +120,7 @@ def prometteur(mat, noeud):
 def print_G(matrice):
     for row in matrice:
         for el in row:
-            print(f'{el}'.ljust(3, ' '), end=' ')
+            print(f'{el:.3f}'.ljust(5, ' '), end=' ')
         print()
     print()
 
@@ -92,28 +128,20 @@ def print_G(matrice):
 if __name__ == '__main__':
     lab = Labyrinthe(5)
     lab.remplir(5)
-    offset = 100
     G = lab.obtenir_matrice()
     depart = trouver_depart(G)
     if depart is None:
         print("Pas de départ")
         exit(1)
-    matrice_des_numeros = initialiser_matrice_des_numeros(G)
+    matrice_de_probabilites = initialiser_matrice_de_probabilites(G)
 
     print_G(G)
 
     t_1 = time()
-    numerotation_des_cases(matrice_des_numeros, G, depart, offset)
-    matrice_des_numeros[depart[0]][depart[1]] = offset
-    res_final = un_des_PCC(G, matrice_des_numeros, depart)
+    parcours_probabiliste(matrice_de_probabilites, G, depart)
     t_2 = time()
 
-    print('Matrice des numéros finale :')
-    print_G(matrice_des_numeros)
-
-    if res_final:
-        print('PCC trouvé :', res_final)
-    else:
-        print('échec')
+    print('Matrice de probabilités finale :')
+    print_G(matrice_de_probabilites)
 
     print('Temps de calcul :', t_2 - t_1)
