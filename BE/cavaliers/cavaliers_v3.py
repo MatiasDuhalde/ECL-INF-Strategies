@@ -1,8 +1,10 @@
 """
 Résoudre le problème des cavaliers
 
-Code basé sur des slides du cours
+Algorithme à Essais Successifs (AES) utilisant matrice de voisins
+Code basé sur des slides du cours et annexes
 """
+from time import time
 import numpy as np
 
 TAB_DELTA_X_Y = [[1, 2], [1, -2], [-1, 2], [-1, -2], [2, 1], [2, -1], [-2, 1], [-2, -1]]
@@ -57,14 +59,14 @@ def trouver_meilleurs_voisins_libres(matrice, matrice_voisins, pos_cavalier):
 def trouver_le_premier_voisin_de_degre_minimal_libre(matrice, matrice_voisins, pos_cavalier):
     x, y = pos_cavalier
     min_k = 9
-    nx_k, ny_k = -1, -1
+    # nx_k, ny_k = -1, -1
     for k in range(8):
         nx, ny = x + TAB_DELTA_X_Y[k][0], y + TAB_DELTA_X_Y[k][1]
         if not prometteur(matrice, nx, ny):
             continue
         if min_k > matrice_voisins[nx - 2][ny - 2]:
             min_k = matrice_voisins[nx - 2][ny - 2]
-            nx_k, ny_k = nx, ny
+            # nx_k, ny_k = nx, ny
     return min_k
 
 
@@ -106,23 +108,26 @@ def prometteur(echiquier, next_x, next_y):
 
 
 if __name__ == '__main__':
-    N = int(input("Taille de la matrice ? "))
-    depart = tuple(map(int, input("Départ du cavalier ? ").split()))
-    real_depart = (depart[0] + 2, depart[1] + 2)
+    N = int(input("Taille de la matrice ? (>4; défaut 5) ") or 5)
+    depart = tuple(
+        map(int, (input(f"Départ du cavalier ? (0<=x,y<={N-1}; défaut 0 0) ") or "0 0").split()))
+    depart_reel = (depart[0] + 2, depart[1] + 2)
 
     print("Taille : ", N)
     print("Départ : ", depart)
 
     G = creer_matrice(N)
     V = calculer_voisins(G, N)
-    G[real_depart[0], real_depart[1]] = 1
+    G[depart_reel[0], depart_reel[1]] = 1
 
     prochaine_numero = 2
 
     stats = [0, 0]
 
+    t_1 = time()
     final_res = AES_parcours_cavalier_un_succes_suffit(
-        G, N, V, real_depart, prochaine_numero, stats)
+        G, N, V, depart_reel, prochaine_numero, stats)
+    t_2 = time()
     if final_res:
         for row in range(2, N + 2):
             print(G[2:N + 2, row])
@@ -130,3 +135,4 @@ if __name__ == '__main__':
         print('échec')
     print('Nombre de tentatives :', stats[0])
     print('Nombre de backtracks :', stats[1])
+    print('Temps de calcul :', t_2 - t_1)
