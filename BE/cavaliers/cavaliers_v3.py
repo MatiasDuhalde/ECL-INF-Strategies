@@ -1,7 +1,8 @@
 """
 Résoudre le problème des cavaliers
 
-Algorithme à Essais Successifs (AES), implementation naïve, avec bande
+Algorithme à Essais Successifs (AES) utilisant matrice de voisins
+Code basé sur des slides du cours et annexes
 """
 from time import time
 
