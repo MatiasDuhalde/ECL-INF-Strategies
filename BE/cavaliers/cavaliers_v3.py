@@ -64,6 +64,14 @@ class Echiquier:
                 self.__voisins[x_suivant - 2][y_suivant - 2] += ajout
 
     def trouver_meilleurs_voisins_libres(self, position_actuel: Case) -> list[Case]:
+        """Trouver la liste de meilleurs voisins libres d'une case
+
+        Args:
+            position_actuel (Case): case d'où on retrouve les voisins
+
+        Returns:
+            list[Case]: liste de meilleurs voisins trouvée
+        """
         k_min = self.trouver_le_premier_voisin_de_degre_minimal_libre(position_actuel)
         if k_min >= 0:
             return self.trouver_tous_les_meilleurs_voisins(position_actuel, k_min)
@@ -71,6 +79,14 @@ class Echiquier:
         return []
 
     def trouver_le_premier_voisin_de_degre_minimal_libre(self, position_actuel: Case) -> int:
+        """Trouver le degré minimal libre (la valeur de la case avec le moins de voisins)
+
+        Args:
+            position_actuel (Case): case d'où on retrouve les voisins
+
+        Returns:
+            int: valeur de la case avec le moins de voisins
+        """
         _x, _y = position_actuel
         # on commence par le maximum (9)
         k_min = 9
@@ -83,6 +99,16 @@ class Echiquier:
         return k_min
 
     def trouver_tous_les_meilleurs_voisins(self, position_actuel: Case, k_min: int) -> list[Case]:
+        """Trouver la liste de voisins de la position actuelle où le nombre de voisins est égal à
+            k_min
+
+        Args:
+            position_actuel (Case): case d'où on retrouve les voisins
+            k_min (int): valeur désirée
+
+        Returns:
+            list[Case]: liste de voisins trouvée
+        """
         meilleurs_voisins = []
         _x, _y = position_actuel
         for x_offset, y_offset in Echiquier.TAB_DELTA_X_Y:
