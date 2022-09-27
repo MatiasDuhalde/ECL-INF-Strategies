@@ -100,9 +100,13 @@ class Echiquier:
         """Résoudre le problème du cavalier
 
         Returns:
-            bool: _description_
+            bool: True s'il est possible pour le chevalier de parcourir tout l'échiquier.
+                Sinon, False.
         """
         return self.aes_parcour_cavalier_un_succes_suffit(self.case_de_depart, 2)
+
+    def obtenir_echiquier(self):
+        return self.__matrice
 
     def __repr__(self) -> str:
         return str(self.__matrice)

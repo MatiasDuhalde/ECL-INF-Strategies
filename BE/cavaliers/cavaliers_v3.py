@@ -49,7 +49,7 @@ class Echiquier:
         return voisins
 
     def mise_a_jour_voisins(self, position_actuel: Case, inverse=False) -> None:
-        """Mise à jour la matrice de voisins quand la position du cavalier change
+        """Mise à jour la matrice de voisins quand la position du cavalier change
 
         Args:
             position_actuel (Case): position du cavalier
@@ -176,7 +176,6 @@ class Echiquier:
         if prochain_num_etape > self.nombre_de_cases:
             return True
         meilleurs_voisins = self.trouver_meilleurs_voisins_libres(derniere_case_traitee)
-        print(len(meilleurs_voisins))
         for nouvelle_case in meilleurs_voisins:
             self.mise_a_jour_voisins(nouvelle_case)
             if self.prometteur(nouvelle_case):
@@ -194,9 +193,13 @@ class Echiquier:
         """Résoudre le problème du cavalier
 
         Returns:
-            bool: _description_
+            bool: True s'il est possible pour le chevalier de parcourir tout l'échiquier.
+                Sinon, False.
         """
         return self.aes_parcour_cavalier_un_succes_suffit(self.case_de_depart, 2)
+
+    def obtenir_echiquier(self):
+        return self.__matrice[2:2+self.dimension, 2:2+self.dimension]
 
     def __repr__(self) -> str:
         return str(self.__matrice[2:2+self.dimension, 2:2+self.dimension])

@@ -9,7 +9,7 @@ def creer_matrice(dim: int) -> np.ndarray:
     """Créer une matrice carrée de taille dim remplie de -1
 
     Args:
-        dim (int): dimension de la matrice à créer
+        dim (int): dimension de la matrice à créer
 
     Returns:
         np.ndarray: matrice résultant
@@ -21,7 +21,7 @@ def creer_matrice_avec_bandes(dim: int) -> np.ndarray:
     """Créer une matrice avec bandes carrée de taille dim remplie de -1
 
     Args:
-        dim (int): dimension de la matrice à créer (sans compter les bandes)
+        dim (int): dimension de la matrice à créer (sans compter les bandes)
 
     Returns:
         np.ndarray: matrice résultant
