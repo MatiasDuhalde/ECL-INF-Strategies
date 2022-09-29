@@ -172,12 +172,12 @@ class Echiquier:
         Returns:
             bool: False si l'algorithme ne trouve pas une solution pour l'état actuel, sinon True
         """
-        self.tentatives += 1
         if prochain_num_etape > self.nombre_de_cases:
             return True
         meilleurs_voisins = self.trouver_meilleurs_voisins_libres(derniere_case_traitee)
         for nouvelle_case in meilleurs_voisins:
             self.mise_a_jour_voisins(nouvelle_case)
+            self.tentatives += 1
             if self.prometteur(nouvelle_case):
                 self.fixer_case(nouvelle_case, prochain_num_etape)
                 res = self.aes_parcour_cavalier_un_succes_suffit(

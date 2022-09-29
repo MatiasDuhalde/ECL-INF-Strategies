@@ -80,11 +80,11 @@ class Echiquier:
             bool: False si l'algorithme ne trouve pas une solution pour l'état actuel, sinon True
         """
         x_actuel, y_actuel = derniere_case_traitee
-        self.tentatives += 1
         if prochain_num_etape > self.nombre_de_cases:
             return True
         for x_offset, y_offset in Echiquier.TAB_DELTA_X_Y:
             nouvelle_case = (x_actuel + x_offset, y_actuel + y_offset)
+            self.tentatives += 1
             if self.prometteur(nouvelle_case):
                 self.fixer_case(nouvelle_case, prochain_num_etape)
                 res = self.aes_parcour_cavalier_un_succes_suffit(
