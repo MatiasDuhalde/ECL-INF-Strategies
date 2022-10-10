@@ -23,7 +23,7 @@ class Console:
         self.morpion = Morpion(self.dimension, interface=self)
 
         self.message = ConsoleMessage('Morpion !')
-        self.current_player = ConsoleMessage('')
+        self.current_player = ConsoleMessage(f'Joueur {self.morpion.joueur_actuel}')
 
     def get_input(self) -> Union[str, Case]:
         input_valide = False
@@ -40,7 +40,6 @@ class Console:
             if len(case) == 2 and all(k.isnumeric() for k in case):
                 tentative = tuple(int(x) for x in case)
                 if all(0 <= k < self.dimension for k in tentative):
-                    print('Input valide')
                     input_valide = True
                     res = tentative
             if not input_valide:
@@ -69,6 +68,7 @@ class Console:
             if isinstance(case, str):
                 return 'r'
             self.morpion.essai_marquer_case(case)
+            print(self.message)
 
     def commencer(self):
         print('Morpion !')
@@ -117,7 +117,6 @@ class ConsoleMessage:
 
     def set(self, value):
         self.value = value
-        print(self)
 
     def __str__(self) -> str:
         return self.value
