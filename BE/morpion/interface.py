@@ -40,6 +40,11 @@ class Interface(tk.Tk):
         self.frame_can = tk.Frame(self)
         self.frame_can.pack(side='top')
 
+        self.message = tk.StringVar()
+        self.message.set('Morpion !')
+        self.message_label = tk.Label(self, textvariable=self.message)
+        self.message_label.pack(side='bottom', pady=10)
+
         # Boutons
         self.action_frame = tk.Frame(self)
         self.action_frame.pack(side='bottom')
@@ -50,7 +55,7 @@ class Interface(tk.Tk):
         self.info_frame = tk.Frame(self.action_frame)
         self.info_frame.pack(side='left')
         self.current_player_label = tk.Label(self.info_frame, textvariable=self.current_player)
-        self.current_player_label.pack(side='left')
+        self.current_player_label.pack(side='left', padx=20)
 
         self.button_frame = tk.Frame(self.action_frame)
         self.button_frame.pack(side='right')
@@ -98,6 +103,8 @@ class Interface(tk.Tk):
         print('Réinitialisation...')
         self.morpion = Morpion(self.dimension, interface=self)
         self.retracer()
+        self.message.set('Morpion !')
+        self.current_player.set(f'Joueur {self.morpion.joueur_actuel}')
 
     def action_quitter(self):
         self.destroy()
@@ -155,12 +162,41 @@ class Morpion():
         self.ia = None
 
     def essai_marquer_case(self, case: Case) -> Union[bool, tuple[Case, Union[str, None]]]:
+        if not self.interface:
+            print(f'Joeur {self.joueur_actuel} joue en {case}')
+        res = self.essai_marquer_case_internal(case)
+        if self.interface:
+            interface_message = ''
+            if res == False:
+                interface_message = f'Choix {case} invalide ! '
+                if self.joueur_peut_ajouter_nouvelle_forme(self.joueur_actuel):
+                    if self.case_a_vider == case:
+                        interface_message += 'Veuillez choisir une case différente !'
+                    else:
+                        interface_message += 'Veuillez choisir une case vide !'
+                else:
+                    interface_message += 'Veuillez choisir une de vos cases !'
+            elif isinstance(res, tuple):
+                interface_message = f'Choix {case} valide ! '
+                case, forme = res
+                if forme is None:
+                    self.interface.effacer(case)
+                    interface_message += f'Case {case} effacée '
+                else:
+                    self.interface.tracer(forme, case)
+                    interface_message += f'Case {case} marquée avec {forme} '
+                self.interface.current_player.set(f'Joueur {self.joueur_actuel}')
+            self.interface.message.set(interface_message)
+        else:
+            # Console
+            print(f'Choix {case} invalide')
+        return res
+
+    def essai_marquer_case_internal(self, case: Case) -> Union[bool, tuple[Case, Union[str, None]]]:
         if (self.case_est_libre(case) and
                 self.joueur_peut_ajouter_nouvelle_forme(self.joueur_actuel) and
                 self.case_a_vider != case):
             self.set_case_value(case, self.joueur_actuel)
-            if self.interface:
-                self.interface.tracer(self.joueur_actuel, case)
             self.case_a_vider = None
             self.basculer_joeur()
             return case, self.joueur_actuel
