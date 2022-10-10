@@ -11,10 +11,9 @@ Deux boutons sont crées (bouton1, bouton2) pour la démo.
 Ce code est une aide de base pour réaliser le BE 'Morpion' avec TKinter.
 """
 
-
+import sys
 import random
 import tkinter as tk
-import copy
 from typing import Union
 
 
@@ -100,10 +99,9 @@ class Interface(tk.Tk):
                 )
 
     def action_reinitialiser(self):
-        print('Réinitialisation...')
         self.morpion = Morpion(self.dimension, interface=self)
         self.retracer()
-        self.message.set('Morpion !')
+        self.message.set('Morpion réinitialisé !')
         self.current_player.set(f'Joueur {self.morpion.joueur_actuel}')
 
     def action_quitter(self):
@@ -143,31 +141,154 @@ class Interface(tk.Tk):
         self.morpion.essai_marquer_case(case)
 
 
+class Console:
+    SYMBOLS = {
+        'rond':  'O',
+        'croix':  'X',
+        None: ' '
+    }
+
+    def __init__(self) -> None:
+
+        self.dimension = 3
+        self.morpion = Morpion(self.dimension, interface=self)
+
+        self.message = ConsoleMessage('Morpion !')
+        self.current_player = ConsoleMessage('')
+
+    def get_input(self) -> Union[str, Case]:
+        input_valide = False
+        res = ''
+        while not input_valide:
+            prompt = 'Veuillez introduire une case (format i j, r -> réinitialiser, q -> quitter): '
+            value = input(prompt).strip()
+            if value == 'q':
+                self.quitter()
+            if value == 'r':
+                self.reinitialiser()
+                return 'r'
+            case = value.split()
+            if len(case) == 2 and all(k.isnumeric() for k in case):
+                tentative = tuple(int(x) for x in case)
+                if all(0 <= k < self.dimension for k in tentative):
+                    print('Input valide')
+                    input_valide = True
+                    res = tentative
+            if not input_valide:
+                print('Input invalide')
+        return res
+
+    def effacer(self, case):
+        pass
+
+    def tracer(self, forme, case):
+        pass
+
+    def reinitialiser(self):
+        self.morpion = Morpion(self.dimension, interface=self)
+        self.message = ConsoleMessage('Morpion !')
+        self.current_player = ConsoleMessage(f'Joueur {self.morpion.joueur_actuel}')
+
+    def quitter(self):
+        sys.exit(0)
+
+    def main_loop(self) -> str:
+        while True:
+            print('Joueur actuel :', self.current_player.value)
+            self.print_matrice()
+            case = self.get_input()
+            if isinstance(case, str):
+                return 'r'
+            self.morpion.essai_marquer_case(case)
+
+    def commencer(self):
+        print('Morpion !')
+        continuer = True
+        while continuer:
+            res = self.main_loop()
+            if res == 'i':
+                continue
+            if res == 'fin':
+                cont = self.demander_y_n('Voulez vous réinitialiser ? (y/n) : ')
+                if cont == 'n':
+                    continuer = False
+                else:
+                    self.reinitialiser()
+
+    def demander_y_n(self, prompt: str) -> str:
+        input_valide = False
+        res = ''
+        while not input_valide:
+            value = input(prompt).strip().lower()
+            if value in ('y', 'n'):
+                input_valide = True
+                res = value
+            if not input_valide:
+                print('Input invalide')
+        return res
+
+    def print_matrice(self):
+        """Affiche la matrice M
+
+        Args:
+            M (list): Matrice à afficher
+        """
+        print('╔' + '═'*(2*self.dimension - 1) + '╗')
+        for line in self.morpion.matrice:
+            print('║', end='')
+            print(*(self.SYMBOLS[el] for el in line), sep=' ', end='')
+            print('║')
+        print('╚' + '═'*(2*self.dimension - 1) + '╝')
+
+
+class ConsoleMessage:
+
+    def __init__(self, value='') -> None:
+        self.value = value
+
+    def set(self, value):
+        self.value = value
+        print(self)
+
+    def __str__(self) -> str:
+        return self.value
+
+    def __repr__(self) -> str:
+        return self.value
+
+
+class MorpionAdversaire:
+
+    def __init__(self, morpion):
+        self.morpion = morpion
+
+
 class Morpion():
 
-    JOEURS = ['rond', 'croix']
+    JOUEURS = ['rond', 'croix']
 
-    def __init__(self, dimension: int, interface=None):
+    def __init__(self, dimension: int, interface=None, player1='humain', player2='humain'):
         self.dimension = dimension
-        self.interface: Union[None, Interface] = interface
+        self.interface: Union[None, Interface, Console] = interface
         self.cases_per_joueur = self.dimension
         self.matrice: list[list[Union[str, None]]] = [
             [None for j in range(self.dimension)] for i in range(self.dimension)
         ]
-        self.joueur_actuel = random.choice(self.JOEURS)
+        self.joueur_actuel = random.choice(self.JOUEURS)
         self.nombre_tour = 0
-        self.coords_joueur = {joueur: [] for joueur in self.JOEURS}
+        self.coords_joueur = {joueur: [] for joueur in self.JOUEURS}
         self.case_a_vider: Union[None, tuple[int, int]] = None
         self.vainqueur: Union[None, str] = None
-        self.ia = None
+        self.joueurs = {
+            'croix': MorpionAdversaire(self) if player1 == 'ia' else None,
+            'rond': MorpionAdversaire(self) if player2 == 'ia' else None,
+        }
 
     def essai_marquer_case(self, case: Case) -> Union[bool, tuple[Case, Union[str, None]]]:
-        if not self.interface:
-            print(f'Joeur {self.joueur_actuel} joue en {case}')
         res = self.essai_marquer_case_internal(case)
         if self.interface:
             interface_message = ''
-            if res == False:
+            if res is False:
                 interface_message = f'Choix {case} invalide ! '
                 if self.joueur_peut_ajouter_nouvelle_forme(self.joueur_actuel):
                     if self.case_a_vider == case:
@@ -187,9 +308,6 @@ class Morpion():
                     interface_message += f'Case {case} marquée avec {forme} '
                 self.interface.current_player.set(f'Joueur {self.joueur_actuel}')
             self.interface.message.set(interface_message)
-        else:
-            # Console
-            print(f'Choix {case} invalide')
         return res
 
     def essai_marquer_case_internal(self, case: Case) -> Union[bool, tuple[Case, Union[str, None]]]:
@@ -198,14 +316,12 @@ class Morpion():
                 self.case_a_vider != case):
             self.set_case_value(case, self.joueur_actuel)
             self.case_a_vider = None
-            self.basculer_joeur()
+            self.basculer_joueur()
             return case, self.joueur_actuel
         if (self.case_a_vider is None and
             not self.joueur_peut_ajouter_nouvelle_forme(self.joueur_actuel) and
                 self.case_est_de_joeueur(case, self.joueur_actuel)):
             self.set_case_value(case, None)
-            if self.interface:
-                self.interface.effacer(case)
             self.case_a_vider = case
             return case, None
         return False
@@ -234,39 +350,13 @@ class Morpion():
         else:
             self.coords_joueur[self.joueur_actuel].remove(case)
 
-    def basculer_joeur(self):
+    def basculer_joueur(self):
         self.joueur_actuel = 'rond' if self.joueur_actuel == 'croix' else 'croix'
 
 
-def print_matrice(M: list):
-    """Affiche la matrice M
-
-    Args:
-        M (list): Matrice à afficher
-    """
-    for i in range(len(M)):
-        print(M[i])
-
-
-def adversaire(joueur):
-    if joueur == 'croix':
-        return 'rond'
-    return 'croix'
-
-
-def copier_matrice(M: list) -> list:
-    """Faire une copie de la matrice M
-
-    Args:
-        M (list): Matrice à copier
-
-    Returns:
-        list: Copie de la matrice M
-    """
-    L = copy.deepcopy(M)
-    return L
-
-
 if __name__ == "__main__":
-    jeu = Interface()
-    jeu.mainloop()
+    # jeu = Interface()
+    # jeu.mainloop()
+
+    jeu = Console()
+    jeu.commencer()
