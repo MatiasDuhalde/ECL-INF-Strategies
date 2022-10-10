@@ -1,0 +1,2 @@
+
+Case = tuple[int, int]
