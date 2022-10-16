@@ -85,6 +85,10 @@ class Morpion():
     def case_est_de_joeueur(self, case: Case, joueur: str) -> bool:
         return self.get_case_value(case) == joueur
 
+    def get_cases_vides(self) -> list[Case]:
+        return [(i, j) for i in range(self.dimension) for j in range(self.dimension)
+                if self.matrice[i][j] is None]
+
     def get_case_value(self, case: Case) -> Union[str, None]:
         _x, _y = case
         return self.matrice[_x][_y]
