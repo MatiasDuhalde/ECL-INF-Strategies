@@ -328,5 +328,14 @@ class Morpion():
 
 
 if __name__ == "__main__":
-    morpion = Morpion(3, 'ia')
+    dimension = 3
+    # humain vs humain
+    # morpion = Morpion(dimension)
+
+    # humain vs ia
+    # morpion = Morpion(dimension, 'ia')
+
+    # ia vs ia
+    morpion = Morpion(dimension, 'ia', 'ia')
+
     morpion.commencer()
