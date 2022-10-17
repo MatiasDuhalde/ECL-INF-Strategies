@@ -1,14 +1,13 @@
 
 
 from __future__ import annotations
-import random
 
-from typing import Union, TYPE_CHECKING
-
+from random import choice
+from typing import TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
-    from utils import Case
     from morpion import Morpion
+    from utils import Case
 
 
 class MorpionAdversaire:
@@ -21,10 +20,17 @@ class MorpionAdversaire:
         cases = self.morpion.get_cases_vides()
         if restriction:
             cases = [case for case in cases if case not in restriction]
-        return random.choice(cases)
+        return choice(cases)
 
     def choisir_case_propre(self, restriction: Union[None, list[Case]] = None) -> Case:
         cases = self.morpion.coords_joueur[self.forme]
         if restriction:
             cases = [case for case in cases if case not in restriction]
-        return random.choice(cases)
+        return choice(cases)
+
+
+if __name__ == "__main__":
+    pass
+    # human vs ai
+
+    # ai vs ai

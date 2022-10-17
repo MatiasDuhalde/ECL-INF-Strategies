@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import sys
-from typing import Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 
 from morpion import Morpion
 
@@ -17,10 +17,8 @@ class Console:
         None: ' '
     }
 
-    def __init__(self) -> None:
-
-        self.dimension = 3
-        self.morpion = Morpion(self.dimension, interface=self)
+    def __init__(self, morpion: Morpion) -> None:
+        self.morpion = morpion
 
         self.message = ConsoleMessage('Morpion !')
         self.current_player = ConsoleMessage(f'Joueur {self.morpion.joueur_actuel}')
@@ -39,7 +37,7 @@ class Console:
             case = value.split()
             if len(case) == 2 and all(k.isnumeric() for k in case):
                 tentative = tuple(int(x) for x in case)
-                if all(0 <= k < self.dimension for k in tentative):
+                if all(0 <= k < self.morpion.dimension for k in tentative):
                     input_valide = True
                     res = tentative
             if not input_valide:
@@ -53,7 +51,7 @@ class Console:
         pass
 
     def reinitialiser(self):
-        self.morpion = Morpion(self.dimension, interface=self)
+        self.morpion.reinitialiser()
         self.message = ConsoleMessage('Morpion !')
         self.current_player = ConsoleMessage(f'Joueur {self.morpion.joueur_actuel}')
 
@@ -102,12 +100,12 @@ class Console:
         Args:
             M (list): Matrice à afficher
         """
-        print('╔' + '═'*(2*self.dimension - 1) + '╗')
+        print('╔' + '═'*(2*self.morpion.dimension - 1) + '╗')
         for line in self.morpion.matrice:
             print('║', end='')
             print(*(self.SYMBOLS[el] for el in line), sep=' ', end='')
             print('║')
-        print('╚' + '═'*(2*self.dimension - 1) + '╝')
+        print('╚' + '═'*(2*self.morpion.dimension - 1) + '╝')
 
 
 class ConsoleMessage:
@@ -123,8 +121,3 @@ class ConsoleMessage:
 
     def __repr__(self) -> str:
         return self.value
-
-
-if __name__ == '__main__':
-    console = Console()
-    console.commencer()

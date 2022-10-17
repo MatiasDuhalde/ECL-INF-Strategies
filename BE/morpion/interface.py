@@ -12,8 +12,8 @@ Ce code est une aide de base pour réaliser le BE 'Morpion' avec TKinter.
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
 import tkinter as tk
+from typing import TYPE_CHECKING
 
 from morpion import Morpion
 
@@ -25,16 +25,15 @@ class Interface(tk.Tk):
     """Interface pour le jeu du morpion
     """
 
-    def __init__(self):
+    def __init__(self, morpion: Morpion):
         super().__init__()
 
-        self.dimension = 3
-        self.morpion = Morpion(self.dimension, interface=self)
+        self.morpion = morpion
 
         self.width_canvas = 600
         self.height_canvas = 600
-        self.offset_x_drawing_from_border = self.width_canvas / self.dimension * 0.1
-        self.offset_y_drawing_from_border = self.height_canvas / self.dimension * 0.1
+        self.offset_x_drawing_from_border = self.width_canvas / self.morpion.dimension * 0.1
+        self.offset_y_drawing_from_border = self.height_canvas / self.morpion.dimension * 0.1
 
         # Frame principale
         self.frame_can = tk.Frame(self)
@@ -73,13 +72,13 @@ class Interface(tk.Tk):
         self.canvas = tk.Canvas(self.frame_can, width=self.width_canvas,
                                 height=self.height_canvas, bg='white')
         # Creer lignes verticales et horizontales
-        for i in range(1, self.dimension):
-            self.canvas.create_line(i * self.width_canvas / self.dimension, 0,
-                                    i * self.width_canvas / self.dimension,
+        for i in range(1, self.morpion.dimension):
+            self.canvas.create_line(i * self.width_canvas / self.morpion.dimension, 0,
+                                    i * self.width_canvas / self.morpion.dimension,
                                     self.height_canvas, fill='black')
-            self.canvas.create_line(0, i * self.height_canvas / self.dimension,
+            self.canvas.create_line(0, i * self.height_canvas / self.morpion.dimension,
                                     self.width_canvas,
-                                    i * self.height_canvas / self.dimension, fill='black')
+                                    i * self.height_canvas / self.morpion.dimension, fill='black')
 
         # <Button-1> : Bouton gauche de la souris
         self.canvas.bind("<Button-1>", self.on_click_souris)
@@ -87,11 +86,11 @@ class Interface(tk.Tk):
 
         self.humain = False
         self.liste_coords_cases = {}
-        width_cell = self.width_canvas / self.dimension
-        height_cell = self.height_canvas / self.dimension
+        width_cell = self.width_canvas / self.morpion.dimension
+        height_cell = self.height_canvas / self.morpion.dimension
         # Création de la liste des cases pour y tracer les formes
-        for i in range(self.dimension):
-            for j in range(self.dimension):
+        for i in range(self.morpion.dimension):
+            for j in range(self.morpion.dimension):
                 self.liste_coords_cases[(i, j)] = (
                     i*width_cell + self.offset_x_drawing_from_border,
                     j*height_cell + self.offset_y_drawing_from_border,
@@ -100,7 +99,7 @@ class Interface(tk.Tk):
                 )
 
     def action_reinitialiser(self):
-        self.morpion = Morpion(self.dimension, interface=self)
+        self.morpion.reinitialiser()
         self.retracer()
         self.message.set('Morpion réinitialisé !')
         self.current_player.set(f'Joueur {self.morpion.joueur_actuel}')
@@ -109,8 +108,8 @@ class Interface(tk.Tk):
         self.destroy()
 
     def retracer(self):
-        for i in range(self.dimension):
-            for j in range(self.dimension):
+        for i in range(self.morpion.dimension):
+            for j in range(self.morpion.dimension):
                 case = (i, j)
                 self.effacer(case)
                 forme = self.morpion.get_case_value(case)
@@ -137,11 +136,9 @@ class Interface(tk.Tk):
         _x = event.x
         _y = event.y
 
-        case = (int(_x // (self.width_canvas / self.dimension)),
-                int(_y // (self.height_canvas / self.dimension)))
+        case = (int(_x // (self.width_canvas / self.morpion.dimension)),
+                int(_y // (self.height_canvas / self.morpion.dimension)))
         self.morpion.essai_marquer_case(case)
 
-
-if __name__ == "__main__":
-    jeu = Interface()
-    jeu.mainloop()
+    def commencer(self):
+        self.mainloop()
