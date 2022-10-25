@@ -17,6 +17,7 @@ class Morpion():
     def __init__(self, dimension: int, player1='humain', player2='humain'):
         self.dimension = dimension
         self.cases_per_joueur = self.dimension
+        self.cases_a_la_suite_gagnants = self.dimension
         self.joueurs = {
             'croix': player1,
             'rond': player2,
@@ -94,56 +95,73 @@ class Morpion():
         return None
 
     def gagnant(self, case_placee: Case) -> bool:
+        fil, col = case_placee
         cases_joueur = self.coords_joueur[self.joueur_actuel]
         if self.get_nombre_cases_occupees_du_joueur(self.joueur_actuel) < self.dimension:
             return False
         # check file
-        cases_a_la_suite = 0
+        cases_a_la_suite = 1
         # check left
-        fil, col = case_placee
-        for i in range(col - 1, 0, -1):
-            if (fil, i) in cases_joueur:
+        for j in range(col - 1, -1, -1):
+            if (fil, j) in cases_joueur:
                 cases_a_la_suite += 1
             else:
                 break
         # check right
-        for i in range(col + 1, self.dimension):
-            if (fil, i) in cases_joueur:
+        for j in range(col + 1, self.dimension):
+            if (fil, j) in cases_joueur:
                 cases_a_la_suite += 1
             else:
                 break
-        fil, col = cases_joueur[0]
-        for fil_c, col_c in cases_joueur:
-            if fil != fil_c or col_c != col:
-                break
-            col += 1
-        else:
+        if cases_a_la_suite == self.cases_a_la_suite_gagnants:
             return True
         # check colonne
-        fil, col = cases_joueur[0]
-        for fil_c, col_c in cases_joueur:
-            if fil != fil_c or col_c != col:
+        cases_a_la_suite = 1
+        # check up
+        for i in range(fil - 1, -1, -1):
+            if (i, col) in cases_joueur:
+                cases_a_la_suite += 1
+            else:
                 break
-            fil += 1
-        else:
+        # check down
+        for i in range(fil + 1, self.dimension):
+            if (i, col) in cases_joueur:
+                cases_a_la_suite += 1
+            else:
+                break
+        if cases_a_la_suite == self.cases_a_la_suite_gagnants:
             return True
         # check diag 1
-        fil, col = cases_joueur[0]
-        for fil_c, col_c in cases_joueur:
-            if fil != fil_c or col_c != col:
+        cases_a_la_suite = 1
+        # check up-left
+        for k in range(1, min(fil, col) + 1):
+            if (fil - k, col - k) in cases_joueur:
+                cases_a_la_suite += 1
+            else:
                 break
-            fil += 1
-            col += 1
-        else:
+        # check down-right
+        for k in range(1, self.dimension - max(fil, col) - 1):
+            if (fil + k, col + k) in cases_joueur:
+                cases_a_la_suite += 1
+            else:
+                break
+        if cases_a_la_suite == self.cases_a_la_suite_gagnants:
             return True
         # check diag 2
-        fil, col = cases_joueur[0]
-        for fil_c, col_c in cases_joueur:
-            if fil != fil_c or col_c != col:
+        cases_a_la_suite = 1
+        # check up-right
+        for k in range(1, min(fil, self.dimension - col - 1) + 1):
+            if (fil - k, col + k) in cases_joueur:
+                cases_a_la_suite += 1
+            else:
                 break
-            fil += 1
-            col -= 1
-        else:
+        # check down-left
+        for k in range(1, min(self.dimension - fil - 1, col) + 1):
+            if (fil + k, col - k) in cases_joueur:
+                cases_a_la_suite += 1
+            else:
+                break
+        if cases_a_la_suite == self.cases_a_la_suite_gagnants:
             return True
         return False
 
@@ -265,7 +283,6 @@ class Morpion():
     # Fonctions IA
 
     def jouer_ia(self):
-        print('///')
         if self.joueur_peut_ajouter_nouvelle_forme(self.joueur_actuel):
             rest = []
             if self.case_videe:
@@ -345,7 +362,7 @@ class Morpion():
 
 
 if __name__ == "__main__":
-    dim = 4
+    dim = 3
     # humain vs humain
     # morpion = Morpion(dim)
 
