@@ -11,6 +11,7 @@ Deux boutons sont crées (bouton1, bouton2) pour la démo.
 Ce code est une aide de base pour réaliser le BE 'Morpion' avec TKinter.
 """
 from __future__ import annotations
+from random import choice
 
 import tkinter as tk
 from typing import TYPE_CHECKING
@@ -25,10 +26,13 @@ class Interface(tk.Tk):
     """Interface pour le jeu du morpion
     """
 
-    def __init__(self, morpion: Morpion):
+    def __init__(self, *morpion_args):
         super().__init__()
 
-        self.morpion = morpion
+        self.morpion_args: tuple[int, str, str]
+        self.morpion_args = morpion_args
+        self.morpion = Morpion(*self.morpion_args)
+        self.morpion.joueur_actuel = choice(self.morpion.JOUEURS)
 
         self.width_canvas = 600
         self.height_canvas = 600
@@ -99,22 +103,22 @@ class Interface(tk.Tk):
                 )
 
     def action_reinitialiser(self):
-        self.morpion.reinitialiser()
+        self.morpion = Morpion(*self.morpion_args)
+        self.morpion.joueur_actuel = choice(self.morpion.JOUEURS)
         self.retracer()
         self.message.set('Morpion réinitialisé !')
         self.current_player.set(f'Joueur {self.morpion.joueur_actuel}')
+        self.jouer_tour()
 
     def action_quitter(self):
         self.destroy()
 
     def retracer(self):
-        for i in range(self.morpion.dimension):
-            for j in range(self.morpion.dimension):
-                case = (i, j)
-                self.effacer(case)
-                forme = self.morpion.get_case_value(case)
-                if forme is not None:
-                    self.tracer(forme, case)
+        for case in self.morpion.cases_vides:
+            self.effacer(case)
+        for forme in self.morpion.JOUEURS:
+            for case in self.morpion.coords_joueur[forme]:
+                self.tracer(forme, case)
 
     def tracer(self, forme: str, case: Case):
         # Trace la forme dans la case, rond ou croix
@@ -133,12 +137,64 @@ class Interface(tk.Tk):
             *(self.liste_coords_cases[case]), fill='white', outline='white')
 
     def on_click_souris(self, event):
+        if self.morpion.vainqueur:
+            return
         _x = event.x
         _y = event.y
 
         case = (int(_x // (self.width_canvas / self.morpion.dimension)),
                 int(_y // (self.height_canvas / self.morpion.dimension)))
-        self.morpion.essai_marquer_case(case)
+        case = self.morpion.essai_marquer_case(case)
+        if not isinstance(case, tuple):
+            return
+        self.retracer()
+
+        if self.morpion.case_videe is not None:
+            return
+
+        if self.morpion.gagnant(case[0]):
+            self.morpion.vainqueur = case[1]
+            self.message.set(f'Joueur {case[1]} a gagné !')
+            return
+
+        self.morpion.basculer_joueur()
+        self.current_player.set(f'Joueur {self.morpion.joueur_actuel}')
+        self.jouer_tour()
+
+    def jouer_tour(self):
+        if self.morpion.joueurs[self.morpion.joueur_actuel] == 'humain':
+            # espérer action de joueur
+            return
+        case_marquee = self.morpion.jouer_ia()
+        self.morpion.essai_marquer_case(case_marquee)
+        if self.morpion.case_videe:
+            case_marquee = self.morpion.jouer_ia()
+            self.morpion.essai_marquer_case(case_marquee)
+
+        self.retracer()
+
+        if self.morpion.gagnant(case_marquee):
+            self.morpion.vainqueur = self.morpion.joueur_actuel
+            self.message.set(f'Joueur {self.morpion.vainqueur} a gagné !')
+            return
+        # next turn
+        self.morpion.basculer_joueur()
+        self.current_player.set(f'Joueur {self.morpion.joueur_actuel}')
+        self.jouer_tour()
 
     def commencer(self):
+        self.jouer_tour()
         self.mainloop()
+
+
+if __name__ == '__main__':
+    dimension = 3
+    # humain vs humain
+    # interface = Interface(dimension)
+
+    # humain vs ia
+    interface = Interface(dimension, 'ia')
+
+    # ia vs ia
+    # interface = Interface(dimension, 'ia', 'ia')
+    interface.commencer()

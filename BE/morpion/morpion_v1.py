@@ -140,7 +140,7 @@ class Morpion():
             else:
                 break
         # check down-right
-        for k in range(1, self.dimension - max(fil, col) - 1):
+        for k in range(1, self.dimension - max(fil, col)):
             if (fil + k, col + k) in cases_joueur:
                 cases_a_la_suite += 1
             else:
@@ -150,13 +150,13 @@ class Morpion():
         # check diag 2
         cases_a_la_suite = 1
         # check up-right
-        for k in range(1, min(fil, self.dimension - col - 1) + 1):
+        for k in range(1, min(fil, self.dimension - col) + 1):
             if (fil - k, col + k) in cases_joueur:
                 cases_a_la_suite += 1
             else:
                 break
         # check down-left
-        for k in range(1, min(self.dimension - fil - 1, col) + 1):
+        for k in range(1, min(self.dimension - fil, col) + 1):
             if (fil + k, col - k) in cases_joueur:
                 cases_a_la_suite += 1
             else:
