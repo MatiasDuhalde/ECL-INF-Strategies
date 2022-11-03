@@ -17,6 +17,7 @@ class Morpion():
     def __init__(self, dimension: int, player1='humain', player2='humain'):
         self.dimension = dimension
         self.cases_per_joueur = self.dimension
+        self.cases_a_la_suite_gagnants = self.dimension
         self.joueurs = {
             'croix': player1,
             'rond': player2,
@@ -61,10 +62,11 @@ class Morpion():
         while not fini:
             self.log(f'Joueur actuel: {self.joueur_actuel} ({self.joueurs[self.joueur_actuel]})')
             self.print_matrice()
-            place = self.placer_un_pion()
-            fini = self.gagnant()
-            if not fini and place:
-                self.basculer_joueur()
+            case_placee = self.placer_un_pion()
+            if case_placee:
+                fini = self.gagnant(case_placee)
+                if not fini:
+                    self.basculer_joueur()
         self.vainqueur = self.joueur_actuel
         self.print_matrice()
         self.log(f'Joueur {self.vainqueur} a gagné !')
@@ -76,57 +78,90 @@ class Morpion():
             if joueur_est_humain:
                 case_choisi = self.get_input()
                 if not self.essai_marquer_case(case_choisi):
-                    return False
+                    return None
             else:
                 if not self.essai_marquer_case(self.jouer_ia()):
-                    return False
+                    return None
             self.print_matrice()
         # ajouter pion
         if joueur_est_humain:
             case_choisi = self.get_input()
             if self.essai_marquer_case(case_choisi):
-                return True
-        elif self.essai_marquer_case(self.jouer_ia()):
-            return True
-        return False
+                return case_choisi
+        else:
+            case_choisi = self.jouer_ia()
+            if self.essai_marquer_case(case_choisi):
+                return case_choisi
+        return None
 
-    def gagnant(self) -> bool:
-        cases_joueur = sorted(self.coords_joueur[self.joueur_actuel])
+    def gagnant(self, case_placee: Case) -> bool:
+        fil, col = case_placee
+        cases_joueur = self.coords_joueur[self.joueur_actuel]
         if self.get_nombre_cases_occupees_du_joueur(self.joueur_actuel) < self.dimension:
             return False
         # check file
-        fil, col = cases_joueur[0]
-        for fil_c, col_c in cases_joueur:
-            if fil != fil_c or col_c != col:
+        cases_a_la_suite = 1
+        # check left
+        for j in range(col - 1, -1, -1):
+            if (fil, j) in cases_joueur:
+                cases_a_la_suite += 1
+            else:
                 break
-            col += 1
-        else:
+        # check right
+        for j in range(col + 1, self.dimension):
+            if (fil, j) in cases_joueur:
+                cases_a_la_suite += 1
+            else:
+                break
+        if cases_a_la_suite == self.cases_a_la_suite_gagnants:
             return True
         # check colonne
-        fil, col = cases_joueur[0]
-        for fil_c, col_c in cases_joueur:
-            if fil != fil_c or col_c != col:
+        cases_a_la_suite = 1
+        # check up
+        for i in range(fil - 1, -1, -1):
+            if (i, col) in cases_joueur:
+                cases_a_la_suite += 1
+            else:
                 break
-            fil += 1
-        else:
+        # check down
+        for i in range(fil + 1, self.dimension):
+            if (i, col) in cases_joueur:
+                cases_a_la_suite += 1
+            else:
+                break
+        if cases_a_la_suite == self.cases_a_la_suite_gagnants:
             return True
         # check diag 1
-        fil, col = cases_joueur[0]
-        for fil_c, col_c in cases_joueur:
-            if fil != fil_c or col_c != col:
+        cases_a_la_suite = 1
+        # check up-left
+        for k in range(1, min(fil, col) + 1):
+            if (fil - k, col - k) in cases_joueur:
+                cases_a_la_suite += 1
+            else:
                 break
-            fil += 1
-            col += 1
-        else:
+        # check down-right
+        for k in range(1, self.dimension - max(fil, col)):
+            if (fil + k, col + k) in cases_joueur:
+                cases_a_la_suite += 1
+            else:
+                break
+        if cases_a_la_suite == self.cases_a_la_suite_gagnants:
             return True
         # check diag 2
-        fil, col = cases_joueur[0]
-        for fil_c, col_c in cases_joueur:
-            if fil != fil_c or col_c != col:
+        cases_a_la_suite = 1
+        # check up-right
+        for k in range(1, min(fil, self.dimension - col) + 1):
+            if (fil - k, col + k) in cases_joueur:
+                cases_a_la_suite += 1
+            else:
                 break
-            fil += 1
-            col -= 1
-        else:
+        # check down-left
+        for k in range(1, min(self.dimension - fil, col) + 1):
+            if (fil + k, col - k) in cases_joueur:
+                cases_a_la_suite += 1
+            else:
+                break
+        if cases_a_la_suite == self.cases_a_la_suite_gagnants:
             return True
         return False
 
@@ -248,7 +283,6 @@ class Morpion():
     # Fonctions IA
 
     def jouer_ia(self):
-        print('///')
         if self.joueur_peut_ajouter_nouvelle_forme(self.joueur_actuel):
             rest = []
             if self.case_videe:
@@ -328,7 +362,7 @@ class Morpion():
 
 
 if __name__ == "__main__":
-    dim = 4
+    dim = 3
     # humain vs humain
     # morpion = Morpion(dim)
 
