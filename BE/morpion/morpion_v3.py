@@ -348,7 +348,15 @@ class Morpion():
             return choice(best_diags)
         return choice(best)
 
-    def obtenir_valeur_case(self, case: Case):
+    def obtenir_valeur_case(self, case: Case) -> int:
+        """Calculer la valeur de la case
+
+        Args:
+            case (Case): case à calculer
+
+        Returns:
+            int: valeur de la case
+        """
         nl = self.nombre_pions_ligne(case)
         nc = self.nombre_pions_colonne(case)
         nd1 = self.nombre_pions_diag_1(case)
@@ -370,7 +378,15 @@ class Morpion():
             facteur_nd1 * (nd1_1 - nd1_2)**2 + facteur_nd2 * (nd2_1 - nd2_2)**2
         return g
 
-    def nombre_pions_ligne(self, case: Case):
+    def nombre_pions_ligne(self, case: Case) -> dict[str, int]:
+        """Trouver le nombre de pions dans la ligne
+
+        Args:
+            case (Case): coordonnées
+
+        Returns:
+            dict[str, int]: nombre de cases par joueur
+        """
         compteur = {'croix': 0, 'rond': 0}
         i = case[0]
         for j in range(self.dimension):
@@ -380,7 +396,15 @@ class Morpion():
                 compteur['rond'] += 1
         return compteur
 
-    def nombre_pions_colonne(self, case: Case):
+    def nombre_pions_colonne(self, case: Case) -> dict[str, int]:
+        """Trouver le nombre de pions dans la colonne
+
+        Args:
+            case (Case): coordonnées
+
+        Returns:
+            dict[str, int]: nombre de cases par joueur
+        """
         compteur = {'croix': 0, 'rond': 0}
         j = case[1]
         for i in range(self.dimension):
@@ -390,7 +414,15 @@ class Morpion():
                 compteur['rond'] += 1
         return compteur
 
-    def nombre_pions_diag_1(self, case: Case):
+    def nombre_pions_diag_1(self, case: Case) -> dict[str, int]:
+        """Trouver le nombre de pions dans la diagonale 1 (du haut à gauche vers le bas à droite)
+
+        Args:
+            case (Case): coordonnées
+
+        Returns:
+            dict[str, int]: nombre de cases par joueur
+        """
         compteur = {'croix': 0, 'rond': 0}
         i, j = case
         min_coord = min(i, j)
@@ -404,7 +436,15 @@ class Morpion():
             col += 1
         return compteur
 
-    def nombre_pions_diag_2(self, case: Case):
+    def nombre_pions_diag_2(self, case: Case) -> dict[str, int]:
+        """Trouver le nombre de pions dans la diagonale 2 (du haut à droite vers le bas à gauche)
+
+        Args:
+            case (Case): coordonnées
+
+        Returns:
+            dict[str, int]: nombre de cases par joueur
+        """
         compteur = {'croix': 0, 'rond': 0}
         i, j = case
         min_desp = min(self.dimension - j - 1, i)
