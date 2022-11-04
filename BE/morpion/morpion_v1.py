@@ -1,4 +1,4 @@
-
+"""Travaux à rendre 1"""
 from __future__ import annotations
 
 import sys

@@ -1,4 +1,4 @@
-
+"""Travaux à rendre 3"""
 from __future__ import annotations
 
 import sys
@@ -408,9 +408,9 @@ class Morpion():
         compteur = {'croix': 0, 'rond': 0}
         i = case[0]
         for j in range(self.dimension):
-            if (i, j) in self.coords_joueur['croix']:
+            if self.case_est_de_joueur((i, j), 'croix'):
                 compteur['croix'] += 1
-            elif (i, j) in self.coords_joueur['rond']:
+            elif self.case_est_de_joueur((i, j), 'rond'):
                 compteur['rond'] += 1
         return compteur
 
@@ -426,9 +426,9 @@ class Morpion():
         compteur = {'croix': 0, 'rond': 0}
         j = case[1]
         for i in range(self.dimension):
-            if (i, j) in self.coords_joueur['croix']:
+            if self.case_est_de_joueur((i, j), 'croix'):
                 compteur['croix'] += 1
-            elif (i, j) in self.coords_joueur['rond']:
+            elif self.case_est_de_joueur((i, j), 'rond'):
                 compteur['rond'] += 1
         return compteur
 
@@ -446,9 +446,9 @@ class Morpion():
         min_coord = min(i, j)
         fil, col = i - min_coord, j - min_coord
         for _ in range(self.dimension - fil - col):
-            if (fil, col) in self.coords_joueur['croix']:
+            if self.case_est_de_joueur((fil, col), 'croix'):
                 compteur['croix'] += 1
-            elif (fil, col) in self.coords_joueur['rond']:
+            elif self.case_est_de_joueur((fil, col), 'rond'):
                 compteur['rond'] += 1
             fil += 1
             col += 1
@@ -468,9 +468,9 @@ class Morpion():
         min_desp = min(self.dimension - j - 1, i)
         fil, col = i - min_desp, j + min_desp
         for _ in range(min(self.dimension - fil, col + 1)):
-            if (fil, col) in self.coords_joueur['croix']:
+            if self.case_est_de_joueur((fil, col), 'croix'):
                 compteur['croix'] += 1
-            elif (fil, col) in self.coords_joueur['rond']:
+            elif self.case_est_de_joueur((fil, col), 'rond'):
                 compteur['rond'] += 1
             fil += 1
             col -= 1
@@ -566,9 +566,9 @@ class Morpion():
             symboles = []
             for j in range(self.dimension):
                 symbole = ' '
-                if (i, j) in self.coords_joueur['croix']:
+                if self.case_est_de_joueur((i, j), 'croix'):
                     symbole = 'X'
-                elif (i, j) in self.coords_joueur['rond']:
+                elif self.case_est_de_joueur((i, j), 'rond'):
                     symbole = 'O'
                 symboles.append(symbole)
             self.log(*symboles, sep=' ', end='')
