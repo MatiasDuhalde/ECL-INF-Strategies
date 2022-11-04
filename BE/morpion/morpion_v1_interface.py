@@ -11,9 +11,9 @@ Deux boutons sont crées (bouton1, bouton2) pour la démo.
 Ce code est une aide de base pour réaliser le BE 'Morpion' avec TKinter.
 """
 from __future__ import annotations
-from random import choice
 
 import tkinter as tk
+from random import choice
 from typing import TYPE_CHECKING
 
 from morpion_v1 import Morpion
