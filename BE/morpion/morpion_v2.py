@@ -295,16 +295,13 @@ class Morpion():
             for case in self.cases_vides:
                 valeurs[self.obtenir_valeur_case(case)].append((case,))
         else:
-            for case_a_enlever in self.coords_joueur[self.joueur_actuel]:
-
+            for case_a_enlever in [*self.coords_joueur[self.joueur_actuel]]:
                 cases_vides_avant = [*self.cases_vides]
                 self.liberer_case(case_a_enlever, self.joueur_actuel)
                 for case_a_placer in cases_vides_avant:
                     valeurs[self.obtenir_valeur_case(case_a_placer)].append(
                         (case_a_placer, case_a_enlever))
                 self.marquer_case(case_a_enlever, self.joueur_actuel)
-        for k in valeurs:
-            print(k, valeurs[k])
         return choice(valeurs[max(valeurs)])
 
     def obtenir_valeur_case(self, case: Case):
@@ -312,7 +309,6 @@ class Morpion():
         nc = self.nombre_pions_colonne(case)
         nd1 = self.nombre_pions_diag_1(case)
         nd2 = self.nombre_pions_diag_2(case)
-        print(case, 'ligne', nl, 'colonne', nc, 'd1', nd1, 'd2', nd2)
         autre = 'croix' if self.joueur_actuel == 'rond' else 'rond'
         nl_1 = nl[self.joueur_actuel]
         nc_1 = nc[self.joueur_actuel]
