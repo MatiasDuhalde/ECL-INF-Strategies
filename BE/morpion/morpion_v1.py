@@ -417,9 +417,9 @@ class Morpion():
             symboles = []
             for j in range(self.dimension):
                 symbole = ' '
-                if (i, j) in self.coords_joueur['croix']:
+                if self.case_est_de_joueur((i, j), 'croix'):
                     symbole = 'X'
-                elif (i, j) in self.coords_joueur['rond']:
+                elif self.case_est_de_joueur((i, j), 'rond'):
                     symbole = 'O'
                 symboles.append(symbole)
             self.log(*symboles, sep=' ', end='')
