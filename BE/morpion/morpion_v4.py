@@ -328,9 +328,8 @@ class Morpion():
         self.res_stack.extend(self.min_max())
         return self.res_stack.pop()
 
-    def min_max(self):
+    def min_max(self) -> tuple[Case, ...]:
         self.min_max_rec(self.min_max_profondeur)
-        pass
 
     def min_max_rec(self, k: int):
         pass
@@ -338,7 +337,12 @@ class Morpion():
     def gagnants_possibles(self):
         pass
 
-    def best_first(self):
+    def best_first(self) -> tuple[Case, ...]:
+        """IA: calculer pion a placer (ou enlever) par best-first
+
+        Returns:
+            tuple[Case, ...]: cases a placer/enlever
+        """
         valeurs = defaultdict(list)
         if self.joueur_peut_ajouter_nouvelle_forme(self.joueur_actuel):
             for case in self.cases_vides:

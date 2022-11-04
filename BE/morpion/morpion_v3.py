@@ -327,7 +327,12 @@ class Morpion():
         self.res_stack.extend(self.best_first())
         return self.res_stack.pop()
 
-    def best_first(self):
+    def best_first(self) -> tuple[Case, ...]:
+        """IA: calculer pion a placer (ou enlever) par best-first
+
+        Returns:
+            tuple[Case, ...]: cases a placer/enlever
+        """
         valeurs = defaultdict(list)
         if self.joueur_peut_ajouter_nouvelle_forme(self.joueur_actuel):
             for case in self.cases_vides:
