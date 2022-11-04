@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import sys
-from collections import deque
+from collections import defaultdict, deque
 from random import choice
 from typing import TYPE_CHECKING, Union
 
@@ -31,6 +31,7 @@ class Morpion():
         self.case_videe: Union[None, Case]
         self.vainqueur: Union[None, str]
         self.etats_precedents: deque[tuple[tuple[Case], ...]]
+        self.res_stack = []
 
         self.reinitialiser()
 
@@ -283,12 +284,99 @@ class Morpion():
     # Fonctions IA
 
     def jouer_ia(self):
+        if len(self.res_stack) != 0:
+            return self.res_stack.pop()
+        self.res_stack.extend(self.best_first())
+        return self.res_stack.pop()
+
+    def best_first(self):
+        valeurs = defaultdict(list)
         if self.joueur_peut_ajouter_nouvelle_forme(self.joueur_actuel):
-            rest = []
-            if self.case_videe:
-                rest.append(self.case_videe)
-            return self.choisir_case_vide(rest)
-        return self.choisir_case_propre()
+            for case in self.cases_vides:
+                valeurs[self.obtenir_valeur_case(case)].append((case,))
+        else:
+            for case_a_enlever in self.coords_joueur[self.joueur_actuel]:
+
+                cases_vides_avant = [*self.cases_vides]
+                self.liberer_case(case_a_enlever, self.joueur_actuel)
+                for case_a_placer in cases_vides_avant:
+                    valeurs[self.obtenir_valeur_case(case_a_placer)].append(
+                        (case_a_placer, case_a_enlever))
+                self.marquer_case(case_a_enlever, self.joueur_actuel)
+        for k in valeurs:
+            print(k, valeurs[k])
+        return choice(valeurs[max(valeurs)])
+
+    def obtenir_valeur_case(self, case: Case):
+        nl = self.nombre_pions_ligne(case)
+        nc = self.nombre_pions_colonne(case)
+        nd1 = self.nombre_pions_diag_1(case)
+        nd2 = self.nombre_pions_diag_2(case)
+        print(case, 'ligne', nl, 'colonne', nc, 'd1', nd1, 'd2', nd2)
+        autre = 'croix' if self.joueur_actuel == 'rond' else 'rond'
+        nl_1 = nl[self.joueur_actuel]
+        nc_1 = nc[self.joueur_actuel]
+        nd1_1 = nd1[self.joueur_actuel]
+        nd2_1 = nd2[self.joueur_actuel]
+        nl_2 = nl[autre]
+        nc_2 = nc[autre]
+        nd1_2 = nd1[autre]
+        nd2_2 = nd2[autre]
+        facteur_nl = -1 if nl_2 > nl_1 else 1
+        facteur_nc = -1 if nc_2 > nc_1 else 1
+        facteur_nd1 = -1 if nd1_2 > nd1_1 else 1
+        facteur_nd2 = -1 if nd2_2 > nd2_1 else 1
+        g = facteur_nl * (nl_1 - nl_2)**2 + facteur_nc * (nc_1 - nc_2)**2 + \
+            facteur_nd1 * (nd1_1 - nd1_2)**2 + facteur_nd2 * (nd2_1 - nd2_2)**2
+        return g
+
+    def nombre_pions_ligne(self, case: Case):
+        compteur = {'croix': 0, 'rond': 0}
+        i = case[0]
+        for j in range(self.dimension):
+            if (i, j) in self.coords_joueur['croix']:
+                compteur['croix'] += 1
+            elif (i, j) in self.coords_joueur['rond']:
+                compteur['rond'] += 1
+        return compteur
+
+    def nombre_pions_colonne(self, case: Case):
+        compteur = {'croix': 0, 'rond': 0}
+        j = case[1]
+        for i in range(self.dimension):
+            if (i, j) in self.coords_joueur['croix']:
+                compteur['croix'] += 1
+            elif (i, j) in self.coords_joueur['rond']:
+                compteur['rond'] += 1
+        return compteur
+
+    def nombre_pions_diag_1(self, case: Case):
+        compteur = {'croix': 0, 'rond': 0}
+        i, j = case
+        min_coord = min(i, j)
+        fil, col = i - min_coord, j - min_coord
+        for _ in range(self.dimension - fil - col):
+            if (fil, col) in self.coords_joueur['croix']:
+                compteur['croix'] += 1
+            elif (fil, col) in self.coords_joueur['rond']:
+                compteur['rond'] += 1
+            fil += 1
+            col += 1
+        return compteur
+
+    def nombre_pions_diag_2(self, case: Case):
+        compteur = {'croix': 0, 'rond': 0}
+        i, j = case
+        min_desp = min(self.dimension - j - 1, i)
+        fil, col = i - min_desp, j + min_desp
+        for _ in range(min(self.dimension - fil, col + 1)):
+            if (fil, col) in self.coords_joueur['croix']:
+                compteur['croix'] += 1
+            elif (fil, col) in self.coords_joueur['rond']:
+                compteur['rond'] += 1
+            fil += 1
+            col -= 1
+        return compteur
 
     def choisir_case_vide(self, restriction: Union[None, list[Case]] = None) -> Case:
         cases = self.cases_vides
