@@ -127,7 +127,7 @@ class Morpion():
         fil, col = case_placee
         joueur = joueur or self.joueur_actuel
         cases_joueur = self.coords_joueur[joueur]
-        if self.get_nombre_cases_occupees_du_joueur(self.joueur_actuel) < self.dimension:
+        if self.get_nombre_cases_occupees_du_joueur(joueur) < self.dimension:
             return False
         # check file
         cases_a_la_suite = 1
@@ -346,7 +346,7 @@ class Morpion():
         return (plateau[2],)
 
     def min_max_rec(self, plateau: Plateau, k: int, joueur_a_jouer: str, mode: str
-                    ) -> tuple[Plateau, int]:
+                    ) -> tuple[Plateau, float]:
         autre = 'croix' if joueur_a_jouer == 'rond' else 'rond'
         # set vars pour pouvoir utiliser les méthodes de la classe
         self.coords_joueur = plateau[0]
@@ -355,7 +355,11 @@ class Morpion():
 
         # si on est à la profondeur max ou l'autre joueur gagne, on renvoie le plateau + son score
         if k != self.min_max_profondeur:
-            if k == 0 or self.gagnant(derniere_case_placee, self.joueur_actuel):
+            est_gagnant = self.gagnant(derniere_case_placee, autre)
+            if est_gagnant:
+                score = math.inf if autre == self.joueur_actuel else -math.inf
+                return plateau, score
+            if k == 0:
                 score = self.valeur_min_max(self.joueur_actuel)
                 return plateau, score
 
@@ -407,14 +411,13 @@ class Morpion():
                     best_plateaux = [plateau_successeur_2]
                     min_score = best_score
         if k == self.min_max_profondeur:
-            return choice(best_plateaux), best_score
+            cx = choice(best_plateaux)
+            return cx, best_score
         return plateau, best_score
 
     def valeur_min_max(self, joueur) -> int:
         autre = 'croix' if joueur == 'rond' else 'rond'
         value = self.gagnants_possibles(joueur) - self.gagnants_possibles(autre)
-        self.print_matrice()
-        print('CALCULATED VALUE FOR ' + joueur + ': ' + str(value))
         return value
 
     def gagnants_possibles(self, joueur: str) -> int:
@@ -689,6 +692,6 @@ if __name__ == "__main__":
     morpion = Morpion(dim, 'ia')
 
     # ia vs ia
-    # morpion = Morpion(dim, 'ia', 'ia')
+    morpion = Morpion(dim, 'ia', 'ia')
 
     morpion.commencer()
