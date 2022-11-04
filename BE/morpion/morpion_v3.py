@@ -357,26 +357,39 @@ class Morpion():
         Returns:
             int: valeur de la case
         """
+        autre = 'croix' if self.joueur_actuel == 'rond' else 'rond'
         nl = self.nombre_pions_ligne(case)
         nc = self.nombre_pions_colonne(case)
-        nd1 = self.nombre_pions_diag_1(case)
-        nd2 = self.nombre_pions_diag_2(case)
-        autre = 'croix' if self.joueur_actuel == 'rond' else 'rond'
         nl_1 = nl[self.joueur_actuel]
         nc_1 = nc[self.joueur_actuel]
-        nd1_1 = nd1[self.joueur_actuel]
-        nd2_1 = nd2[self.joueur_actuel]
         nl_2 = nl[autre]
         nc_2 = nc[autre]
-        nd1_2 = nd1[autre]
-        nd2_2 = nd2[autre]
         facteur_nl = -1 if nl_2 > nl_1 else 1
         facteur_nc = -1 if nc_2 > nc_1 else 1
-        facteur_nd1 = -1 if nd1_2 > nd1_1 else 1
-        facteur_nd2 = -1 if nd2_2 > nd2_1 else 1
-        g = facteur_nl * (nl_1 - nl_2)**2 + facteur_nc * (nc_1 - nc_2)**2 + \
-            facteur_nd1 * (nd1_1 - nd1_2)**2 + facteur_nd2 * (nd2_1 - nd2_2)**2
-        return g
+        g_partial = facteur_nl * (nl_1 - nl_2)**2 + facteur_nc * (nc_1 - nc_2)**2
+
+        facteur_nd1 = 1
+        facteur_nd2 = 1
+        if case[0] == case[1]:
+            nd1 = self.nombre_pions_diag_1(case)
+            nd1_1 = nd1[self.joueur_actuel]
+            nd1_2 = nd1[autre]
+            facteur_nd1 = -1 if nd1_2 > nd1_1 else 1
+            g_partial = g_partial + facteur_nd1 * (nd1_1 - nd1_2)**2
+            facteur_nd1 = 2 if nd1_2 > 1 else 1
+
+        if case[0] + case[1] == self.dimension - 1:
+            nd2 = self.nombre_pions_diag_2(case)
+            nd2_1 = nd2[self.joueur_actuel]
+            nd2_2 = nd2[autre]
+            facteur_nd2 = -1 if nd2_2 > nd2_1 else 1
+            g_partial = g_partial + facteur_nd2 * (nd2_1 - nd2_2)**2
+            facteur_nd2 = 2 if nd2_2 > 1 else 1
+
+        facteur_nl = 2 if nl_2 > 1 else 1
+        facteur_nc = 2 if nc_2 > 1 else 1
+        g = g_partial * facteur_nc * facteur_nl * facteur_nd1 * facteur_nd2
+        return abs(g)
 
     def nombre_pions_ligne(self, case: Case) -> dict[str, int]:
         """Trouver le nombre de pions dans la ligne
