@@ -302,7 +302,13 @@ class Morpion():
                     valeurs[self.obtenir_valeur_case(case_a_placer)].append(
                         (case_a_placer, case_a_enlever))
                 self.marquer_case(case_a_enlever, self.joueur_actuel)
-        return choice(valeurs[max(valeurs)])
+        best = valeurs[max(valeurs)]
+        # privilégier diag
+        best_diags = list(filter(lambda x: x[0][0] == x[0][1]
+                          or x[0][0] + x[0][1] == self.dimension - 1, best))
+        if best_diags:
+            return choice(best_diags)
+        return choice(best)
 
     def obtenir_valeur_case(self, case: Case):
         nl = self.nombre_pions_ligne(case)
