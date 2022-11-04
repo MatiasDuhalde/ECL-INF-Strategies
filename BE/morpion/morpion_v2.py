@@ -137,7 +137,7 @@ class Interface(tk.Tk):
             *(self.liste_coords_cases[case]), fill='white', outline='white')
 
     def on_click_souris(self, event):
-        if self.morpion.vainqueur:
+        if self.morpion.vainqueur or self.morpion.jeu_nul:
             return
         _x = event.x
         _y = event.y
@@ -152,9 +152,13 @@ class Interface(tk.Tk):
         if self.morpion.case_videe is not None:
             return
 
-        if self.morpion.gagnant(case[0]):
-            self.morpion.vainqueur = case[1]
-            self.message.set(f'Joueur {case[1]} a gagné !')
+        if self.morpion.jeu_nul:
+            self.message.set('Jeu nul (répétition)')
+            return
+
+        if self.morpion.gagnant(case):
+            self.morpion.vainqueur = self.morpion.joueur_actuel
+            self.message.set(f'Joueur {self.morpion.vainqueur} a gagné !')
             return
 
         self.morpion.basculer_joueur()

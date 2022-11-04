@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import sys
-from collections import deque
 from random import choice
 from typing import TYPE_CHECKING, Union
 
@@ -23,6 +22,7 @@ class Morpion():
             'rond': player2,
         }
         self.silent = False
+        self.jeu_nul = False
 
         self.cases_vides: list[Case]
         self.joueur_actuel: str
@@ -30,7 +30,7 @@ class Morpion():
         self.coords_joueur: dict[str, list[Case]]
         self.case_videe: Union[None, Case]
         self.vainqueur: Union[None, str]
-        self.etats_precedents: deque[tuple[tuple[Case], ...]]
+        self.etats_precedents: list[tuple[set[Case], set[Case]]]
 
         self.reinitialiser()
 
@@ -43,12 +43,17 @@ class Morpion():
         self.coords_joueur = {joueur: [] for joueur in self.JOUEURS}
         self.case_videe = None
         self.vainqueur = None
-        self.etats_precedents = deque((tuple(), tuple(), tuple()))
+        self.etats_precedents = []
+        self.jeu_nul = False
 
     def quitter(self):
+        """Quitter le jeu
+        """
         sys.exit(0)
 
     def commencer(self):
+        """Commencer le jeu
+        """
         self.log('Morpion !')
         self.log(f'Dimension = {self.dimension}')
         self.jouer()
@@ -56,10 +61,12 @@ class Morpion():
     # Fonctions principales
 
     def jouer(self):
+        """Main loop du jeu
+        """
         # Choisir une joueur
         self.joueur_actuel = choice(self.JOUEURS)
         fini = False
-        while not fini:
+        while not fini and not self.jeu_nul:
             self.log(f'Joueur actuel: {self.joueur_actuel} ({self.joueurs[self.joueur_actuel]})')
             self.print_matrice()
             case_placee = self.placer_un_pion()
@@ -67,11 +74,19 @@ class Morpion():
                 fini = self.gagnant(case_placee)
                 if not fini:
                     self.basculer_joueur()
-        self.vainqueur = self.joueur_actuel
         self.print_matrice()
-        self.log(f'Joueur {self.vainqueur} a gagné !')
+        if self.jeu_nul:
+            self.log('Jeu nul (répétition)')
+        else:
+            self.vainqueur = self.joueur_actuel
+            self.log(f'Joueur {self.vainqueur} a gagné !')
 
     def placer_un_pion(self):
+        """Fonction pour placer un pion (humain ou IA)
+
+        Returns:
+            Case: Case à placer ou None si la choix à été invalide
+        """
         joueur_est_humain = self.joueurs[self.joueur_actuel] == 'humain'
         if not self.joueur_peut_ajouter_nouvelle_forme(self.joueur_actuel):
             # retirer pion
@@ -95,6 +110,14 @@ class Morpion():
         return None
 
     def gagnant(self, case_placee: Case) -> bool:
+        """Calculer si la position actuelle est gagnante
+
+        Args:
+            case_placee (Case): dernière case placée pour optimiser l'algorithme
+
+        Returns:
+            bool: True si gagnant, sinon False
+        """
         fil, col = case_placee
         cases_joueur = self.coords_joueur[self.joueur_actuel]
         if self.get_nombre_cases_occupees_du_joueur(self.joueur_actuel) < self.dimension:
@@ -168,13 +191,23 @@ class Morpion():
     # Fonctions morpion
 
     def enregistrer_etat(self):
-        entity = [tuple(self.coords_joueur[k]) for k in self.coords_joueur]
-        entity.append(tuple(self.cases_vides))
-        self.etats_precedents.append(tuple(entity))
-        if len(self.etats_precedents) > 3:
-            self.etats_precedents.popleft()
+        """Garder l'état dans la liste d'états precedentes
+        """
+        nouvel_etat = tuple(set(self.coords_joueur[k]) for k in self.coords_joueur)
+        if len(self.etats_precedents) > 3 and nouvel_etat in self.etats_precedents:
+            self.jeu_nul = True
+        self.etats_precedents.append(nouvel_etat)
 
-    def essai_marquer_case(self, case: Case) -> Union[bool, tuple[Case, Union[str, None]]]:
+    def essai_marquer_case(self, case: Case) -> Union[bool, Case]:
+        """Essayer de marquer une case
+
+        Args:
+            case (Case): case à marquer
+
+        Returns:
+            Union[bool, Case]: False si case est invalide, sinon la case
+                marquée
+        """
         res = self._essai_marquer_case(case)
         if res is False:
             self.log(f'Choix {case} invalide ! ', end='')
@@ -186,28 +219,27 @@ class Morpion():
             else:
                 self.log('Veuillez choisir une de vos cases !')
         elif isinstance(res, tuple):
-            self.log(f'Choix {case} valide ! ')
-            case, forme = res
-            if forme is None:
-                self.log(f'Case {case} effacée')
+            self.log(f'Choix {res} valide ! ')
+            if self.case_videe:
+                self.log(f'Case {res} effacée')
             else:
-                self.log(f'Case {case} marquée avec {forme}')
+                self.log(f'Case {res} marquée')
         return res
 
-    def _essai_marquer_case(self, case: Case) -> Union[bool, tuple[Case, Union[str, None]]]:
+    def _essai_marquer_case(self, case: Case) -> Union[bool, Case]:
         if (self.case_est_libre(case) and
                 self.joueur_peut_ajouter_nouvelle_forme(self.joueur_actuel) and
                 self.case_videe != case):
             self.marquer_case(case, self.joueur_actuel)
             self.case_videe = None
             self.enregistrer_etat()
-            return case, self.joueur_actuel
+            return case
         if (self.case_videe is None and
             not self.joueur_peut_ajouter_nouvelle_forme(self.joueur_actuel) and
                 self.case_est_de_joueur(case, self.joueur_actuel)):
             self.liberer_case(case, self.joueur_actuel)
             self.case_videe = case
-            return case, None
+            return case
         return False
 
     def joueur_peut_ajouter_nouvelle_forme(self, joueur: str) -> bool:
@@ -282,7 +314,12 @@ class Morpion():
 
     # Fonctions IA
 
-    def jouer_ia(self):
+    def jouer_ia(self) -> Case:
+        """IA: jouer une case
+
+        Returns:
+            Case: case choisie pour jouer
+        """
         if self.joueur_peut_ajouter_nouvelle_forme(self.joueur_actuel):
             rest = []
             if self.case_videe:
@@ -291,12 +328,28 @@ class Morpion():
         return self.choisir_case_propre()
 
     def choisir_case_vide(self, restriction: Union[None, list[Case]] = None) -> Case:
+        """IA: choisir aléatoirement une case vide
+
+        Args:
+            restriction (Union[None, list[Case]], optional): Cases interdites. Defaults to None.
+
+        Returns:
+            Case: Case choisie
+        """
         cases = self.cases_vides
         if restriction:
             cases = [case for case in cases if case not in restriction]
         return choice(cases)
 
     def choisir_case_propre(self, restriction: Union[None, list[Case]] = None) -> Case:
+        """IA: choisir aléatoirement une case propre
+
+        Args:
+            restriction (Union[None, list[Case]], optional): Cases. Defaults to None.
+
+        Returns:
+            Case: Case choisie
+        """
         cases = self.coords_joueur[self.joueur_actuel]
         if restriction:
             cases = [case for case in cases if case not in restriction]
@@ -311,6 +364,11 @@ class Morpion():
             print(*args, **kwargs)
 
     def get_input(self) -> Case:
+        """Demander une case à l'humain
+
+        Returns:
+            Case: case choisi
+        """
         input_valide = False
         while not input_valide:
             prompt = 'Veuillez introduire une case (format i j, q -> quitter): '
@@ -328,6 +386,14 @@ class Morpion():
         return (0, 0)
 
     def demander_y_n(self, prompt: str) -> str:
+        """Demander une input yes or no à l'humain
+
+        Args:
+            prompt (str): prompt a montrer
+
+        Returns:
+            str: string reçu
+        """
         input_valide = False
         res = ''
         while not input_valide:
