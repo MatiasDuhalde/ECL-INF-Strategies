@@ -91,7 +91,7 @@ class MorpionBase(ABC):
         """Fonction pour placer un pion (humain ou IA)
 
         Returns:
-            Case: Case à placer ou None si la choix à été invalide
+            Case: Case à placer ou None si la choix à été invalide
         """
         joueur_est_humain = self.joueurs[self.joueur_actuel] == 'humain'
         if not self.joueur_peut_ajouter_nouvelle_forme(self.joueur_actuel):
@@ -210,7 +210,7 @@ class MorpionBase(ABC):
         """Essayer de marquer une case
 
         Args:
-            case (Case): case à marquer
+            case (Case): case à marquer
 
         Returns:
             Union[bool, Case]: False si case est invalide, sinon la case
@@ -276,7 +276,7 @@ class MorpionBase(ABC):
         """Vérifier si la case est vide
 
         Args:
-            case (Case): Case à vérifier
+            case (Case): Case à vérifier
 
         Returns:
             bool: True si la case est vide, sinon False
@@ -287,7 +287,7 @@ class MorpionBase(ABC):
         """Vérifier si la case appartient au joueur
 
         Args:
-            case (Case): Case à vérifier
+            case (Case): Case à vérifier
             joueur (str): Joueur
 
         Returns:
@@ -299,7 +299,7 @@ class MorpionBase(ABC):
         """Marquer une case
 
         Args:
-            case (Case): Case à marquer
+            case (Case): Case à marquer
             joueur (str): Joueur
         """
         self.cases_vides.remove(case)
@@ -309,7 +309,7 @@ class MorpionBase(ABC):
         """Libérer une case
 
         Args:
-            case (Case): Case à marquer
+            case (Case): Case à marquer
             joueur (str): Joueur
         """
         self.coords_joueur[joueur].remove(case)
@@ -476,7 +476,7 @@ class MorpionBase(ABC):
         """Affiche la matrice M
 
         Args:
-            M (list): Matrice à afficher
+            M (list): Matrice à afficher
         """
         self.log('╔' + '═'*(2*self.dimension - 1) + '╗')
         for i in range(self.dimension):

@@ -58,7 +58,7 @@ class Morpion(MorpionBase):
         self.cases_vides = plateau[1]
         derniere_case_placee = plateau[2]
 
-        # si on est à la profondeur max ou l'autre joueur gagne, on renvoie le plateau + son score
+        # si on est à la profondeur max ou l'autre joueur gagne, on renvoie le plateau + son score
         if k != self.min_max_profondeur:
             est_gagnant = self.gagnant(derniere_case_placee, autre)
             if est_gagnant:
