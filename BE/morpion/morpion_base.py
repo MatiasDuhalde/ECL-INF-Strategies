@@ -34,7 +34,7 @@ class MorpionBase(ABC):
         self.coords_joueur: dict[str, list[Case]]
         self.case_videe: Union[None, Case]
         self.vainqueur: Union[None, str]
-        self.etats_precedents: list[tuple[frozenset[Case], frozenset[Case]]]
+        self.etats_precedents: dict[tuple[frozenset[Case], frozenset[Case]], bool]
         self.res_stack: list[Case]
 
         self.reinitialiser()
@@ -48,7 +48,7 @@ class MorpionBase(ABC):
         self.coords_joueur = {joueur: [] for joueur in self.JOUEURS}
         self.case_videe = None
         self.vainqueur = None
-        self.etats_precedents = []
+        self.etats_precedents = {}
         self.jeu_nul = False
         self.res_stack = []
 
@@ -202,9 +202,11 @@ class MorpionBase(ABC):
         """Garder l'état dans la liste d'états precedentes
         """
         nouvel_etat = tuple(frozenset(self.coords_joueur[k]) for k in self.coords_joueur)
-        if len(self.etats_precedents) > 3 and nouvel_etat in self.etats_precedents:
-            self.jeu_nul = True
-        self.etats_precedents.append(nouvel_etat)
+        if len(self.etats_precedents) > 2 * self.dimension:
+            if nouvel_etat in self.etats_precedents:
+                self.jeu_nul = True
+        if len(self.cases_vides) <= self.dimension**2 - 2 * self.dimension:
+            self.etats_precedents[nouvel_etat] = True
 
     def essai_marquer_case(self, case: Case) -> Union[bool, Case]:
         """Essayer de marquer une case
