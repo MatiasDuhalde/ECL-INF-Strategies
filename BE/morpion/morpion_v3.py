@@ -476,34 +476,6 @@ class Morpion():
             col -= 1
         return compteur
 
-    def choisir_case_vide(self, restriction: Union[None, list[Case]] = None) -> Case:
-        """IA: choisir aléatoirement une case vide
-
-        Args:
-            restriction (Union[None, list[Case]], optional): Cases interdites. Defaults to None.
-
-        Returns:
-            Case: Case choisie
-        """
-        cases = self.cases_vides
-        if restriction:
-            cases = [case for case in cases if case not in restriction]
-        return choice(cases)
-
-    def choisir_case_propre(self, restriction: Union[None, list[Case]] = None) -> Case:
-        """IA: choisir aléatoirement une case propre
-
-        Args:
-            restriction (Union[None, list[Case]], optional): Cases. Defaults to None.
-
-        Returns:
-            Case: Case choisie
-        """
-        cases = self.coords_joueur[self.joueur_actuel]
-        if restriction:
-            cases = [case for case in cases if case not in restriction]
-        return choice(cases)
-
     # Fonctions interface
 
     def log(self, *args, **kwargs):
