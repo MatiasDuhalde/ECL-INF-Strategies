@@ -161,9 +161,9 @@ if __name__ == "__main__":
     # morpion = Morpion(DIM)
 
     # humain vs ia
-    morpion = Morpion(DIM, 'ia')
+    # morpion = Morpion(DIM, 'ia')
 
     # ia vs ia
-    # morpion = Morpion(DIM, 'ia', 'ia')
+    morpion = Morpion(DIM, 'ia', 'ia')
 
     morpion.commencer()
