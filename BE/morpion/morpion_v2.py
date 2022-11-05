@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Travaux à rendre 2
+"""Travail à rendre 2
 Sept 2020 : code minimal Tkinter pour Morpion
 Tiré de l aversion plus complète "Code-Eleve-OK-MorpionFinal.py" de AC-2019-20
 
@@ -19,7 +19,7 @@ from typing import TYPE_CHECKING
 from morpion_v1 import Morpion
 
 if TYPE_CHECKING:
-    from utils import Case
+    from morpion_base import Case
 
 
 class Interface(tk.Tk):
