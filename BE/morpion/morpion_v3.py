@@ -31,7 +31,7 @@ class Morpion():
         self.coords_joueur: dict[str, list[Case]]
         self.case_videe: Union[None, Case]
         self.vainqueur: Union[None, str]
-        self.etats_precedents: list[tuple[set[Case], set[Case]]]
+        self.etats_precedents: list[tuple[frozenset[Case], frozenset[Case]]]
         self.res_stack = []
 
         self.reinitialiser()
@@ -195,7 +195,7 @@ class Morpion():
     def enregistrer_etat(self):
         """Garder l'état dans la liste d'états precedentes
         """
-        nouvel_etat = tuple(set(self.coords_joueur[k]) for k in self.coords_joueur)
+        nouvel_etat = tuple(frozenset(self.coords_joueur[k]) for k in self.coords_joueur)
         if len(self.etats_precedents) > 3 and nouvel_etat in self.etats_precedents:
             self.jeu_nul = True
         self.etats_precedents.append(nouvel_etat)
