@@ -202,10 +202,9 @@ class MorpionBase(ABC):
         """Garder l'état dans la liste d'états precedentes
         """
         nouvel_etat = tuple(frozenset(self.coords_joueur[k]) for k in self.coords_joueur)
-        if len(self.etats_precedents) > 2 * self.dimension:
+        if len(self.cases_vides) <= self.dimension**2 - 2 * self.dimension:
             if nouvel_etat in self.etats_precedents:
                 self.jeu_nul = True
-        if len(self.cases_vides) <= self.dimension**2 - 2 * self.dimension:
             self.etats_precedents[nouvel_etat] = True
 
     def essai_marquer_case(self, case: Case) -> Union[bool, Case]:
