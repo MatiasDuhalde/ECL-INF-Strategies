@@ -143,10 +143,10 @@ class Morpion(MorpionBase):
         """
         compteur = 0
         autre = self.autre_joueur(joueur)
-        for k in range(self.dimension):
-            if self.nombre_pions_ligne((k, 0))[autre] == 0:
+        for m in range(self.dimension):
+            if self.nombre_pions_ligne((m, 0))[autre] == 0:
                 compteur += 1
-            if self.nombre_pions_colonne((0, k))[autre] == 0:
+            if self.nombre_pions_colonne((0, m))[autre] == 0:
                 compteur += 1
         if self.nombre_pions_diag_1((0, 0))[autre] == 0:
             compteur += 1
@@ -161,9 +161,9 @@ if __name__ == "__main__":
     # morpion = Morpion(DIM)
 
     # humain vs ia
-    # morpion = Morpion(DIM, 'ia')
+    morpion = Morpion(DIM, 'ia')
 
     # ia vs ia
-    morpion = Morpion(DIM, 'ia', 'ia')
+    # morpion = Morpion(DIM, 'ia', 'ia')
 
     morpion.commencer()
